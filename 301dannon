@@ -1,0 +1,210 @@
+#!/bin/python3
+
+import sys
+import math
+
+class Dannon:
+    # Ctor
+    def __init__(self):
+        self.data = ""
+        self.sequence = []
+        self.comparison = 0
+
+    ## UTILS
+    # reads the 'filePath' file and store it's content in 'self.data' as a string
+    def getFileContent(self, filePath):
+        with open(filePath) as file:
+            self.data = file.read()
+            file.close()
+
+    # convert a string of numbers into a list of numbers, splitting by spaces
+    def getListFromString(self):
+        self.data = " ".join(self.data.split())
+        if (len(self.data) != 0):
+            self.sequence = [float(it) for it in self.data.split(' ')]
+        else:
+            exit(84)
+
+    # reset the comparison counter attribute to 0
+    def resetCounter(self):
+        self.comparison = 0
+
+    # increment the comparison counter attribute (by 1)
+    def incrementCount(self):
+        self.comparison += 1
+
+    ## GETTERS & SETTERS
+    # gets a copy of data attribute
+    def getData(self):
+        return str(self.data)
+
+    # gets a copy of sequence attribute
+    def getSequence(self):
+        return list(self.sequence)
+
+    # get a copy of comparison attribute
+    def getCount(self):
+        return int(self.comparison)
+
+    # give the 'newValue' new value to comparison attribute
+    def setCount(self, newValue):
+        self.comparison = newValue
+
+    ## DISPLAY
+    # display the comparison stats
+    def dispComparison(self, algoName):
+        if self.getCount() == 1:
+            print(algoName + ": %d comparison" % self.getCount())
+        else:
+            print(algoName + ": %d comparisons" % self.getCount())
+
+    ## ALGORYTHM
+    # runs selection sort algo
+    def selectionSort(self):
+        myList = self.getSequence()
+        size = len(myList) - 1
+        i = 0
+        j = 0
+        min = myList[i]
+        while i != size:
+            self.incrementCount()
+            if (myList[i] < min):
+                min = myList[i]
+                j = i
+            i += 1
+        ret = myList[j]
+        myList[j] = myList[0]
+        myList[0] = ret
+        i = 1
+        j = i
+        while i != size:
+            while j != size:
+                self.incrementCount()
+                if (myList[j] < myList[i]):
+                    ret = myList[j]
+                    myList[j] = myList[i]
+                    myList[i] = ret
+                j += 1
+            i += 1
+            j = i
+
+    # runs insertion sort algorythm
+    def insertionSort(self):
+        myList = self.getSequence()
+        for i in range(1, len(self.getSequence())):
+            for n in range(i):
+                self.incrementCount()
+                if myList[i] < myList[n]:
+                    myList.insert(n, myList[i])
+                    myList.pop(i + 1)
+                    break
+
+    # runs bubble sort algo on a copy of 'sequence'
+    def bubbleSort(self):
+        myList = self.getSequence()
+        size = len(myList)
+        for i in range(size - 1, 0, -1):
+            for j in range(0, i, 1):
+                self.incrementCount()
+                if myList[j] > myList[j + 1]:
+                    tmp = myList[j]
+                    myList[j] = myList[j + 1]
+                    myList[j+1] = tmp
+
+    # runs quicksort algo on a copy of 'sequence'
+    def quicksort(self, myList):
+        if len(myList) > 1:
+            pivot = myList[0]
+            less = []
+            greater = []
+            equal = [pivot]
+            for i in range (1, len(myList)):
+                self.incrementCount()
+                if myList[i] >= pivot:
+                    less.append(myList[i])
+                elif myList[i] < pivot:
+                    greater.append(myList[i])
+            ret = self.quicksort(less)
+            ret = ret + equal
+            ret = ret + self.quicksort(greater)
+            return ret
+        else:
+            return (myList)
+
+    # merge parts (Merge Sort)
+    def merge(self, myList, left, right):
+        itLeft = itRight = it = 0
+        while itLeft < len(left) and itRight < len(right):
+            self.incrementCount()
+            if left[itLeft] < right[itRight]:
+                myList[it] = left[itLeft]
+                itLeft += 1
+            else:
+                myList[it] = right[itRight]
+                itRight += 1
+            it += 1
+        while itLeft < len(left):
+            myList[it] = left[itLeft]
+            itLeft += 1
+            it += 1
+        while itRight < len(right):
+            myList[it] = right[itRight]
+            itRight += 1
+            it += 1
+
+    # split into parts (Merge Sort)
+    def split(self, myList):
+        length = len(myList)
+        if length > 1:
+            middle = length // 2
+            left = myList[:middle]
+            right = myList[middle:]
+            self.mergeSort(left)
+            self.mergeSort(right)
+            self.merge(myList, left, right)
+
+    # runs merge sort algo on a copy of 'sequence'
+    def mergeSort(self, myList):
+        self.split(myList)
+
+# prints the usage message and exit using 'ret_value'
+def usage(exe, ret_value):
+    print("USAGE :\n\t" + exe + " file\nDESCRIPTION\n\tfile   file that contains the numbers to be sorted, spearated by spaces")
+    exit(ret_value)
+
+# main()
+if __name__ == "__main__":
+    length = len(sys.argv)
+    if length == 2 and (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
+        usage(sys.argv[0], 84)
+    elif length != 2:
+        usage(sys.argv[0], 84)
+    try:
+        benchmark = Dannon()
+        benchmark.getFileContent(sys.argv[1])
+        benchmark.getListFromString()
+        if (len(benchmark.getSequence()) > 1):
+            print("%d elements" % len(benchmark.getSequence()))
+            benchmark.selectionSort()
+            benchmark.dispComparison("Selection sort")
+            benchmark.resetCounter()
+            benchmark.insertionSort()
+            benchmark.dispComparison("Insertion sort")
+            benchmark.resetCounter()
+            benchmark.bubbleSort()
+            benchmark.dispComparison("Bubble sort")
+            benchmark.resetCounter()
+            benchmark.quicksort(benchmark.getSequence())
+            benchmark.dispComparison("Quicksort")
+            benchmark.resetCounter()
+            benchmark.mergeSort(benchmark.getSequence())
+            benchmark.dispComparison("Merge sort")
+        else:
+            print("%d element" % len(benchmark.getSequence()))
+            benchmark.dispComparison("Selection sort")
+            benchmark.dispComparison("Insertion sort")
+            benchmark.dispComparison("Bubble sort")
+            benchmark.dispComparison("Quicksort")
+            benchmark.dispComparison("Merge sort")
+    except:
+        usage(sys.argv[0], 84)
